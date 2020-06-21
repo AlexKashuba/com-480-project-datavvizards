@@ -7,6 +7,7 @@ import PlanetView from './planet_view'
 import GenresView from './genres_view'
 import CitySimilarities from './city_similarities'
 import Overlay from './common/overlay'
+import SpotifySimpleLogin from './common/spotify_simple_login'
 
 const theme = createMuiTheme({
   palette: {
@@ -36,6 +37,7 @@ export default ({ match, history }) => {
       <Overlay />
         <Router history={history}>
           <Switch>
+            <Route path="/login*" component={SpotifySimpleLogin} />
             <Route path="/cities" component={CitySimilarities} />
             <Route path="/genres" component={GenresView} />
             <Route path="/" component={PlanetView} />
