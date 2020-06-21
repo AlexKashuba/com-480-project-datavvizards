@@ -62,16 +62,29 @@ function getAccessToken() {
   return window.localStorage.getItem('access_token')
 }
 
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+function initAudio() {
+  // let audioCtx = new AudioContext()
+  let audio = new Audio("https://p.scdn.co/mp3-preview/33b6c8c739a224fc7f47135c9bc21f23b768bead?cid=6371ef37c4fc48a18b52a3837f1b51a9")
+  audio.crossOrigin = "anonymous";
+  // const track = audioCtx.createMediaElementSource(audio);
+  // track.connect(audioCtx.destination);
+  // audioCtx.resume();
+  return audio;
+}
+
 export default function ArtistPlayer({ currentArtist, fetchNext }) {
   const classes = useStyles();
-  const audioPromiseRef = useRef(null)
+  // const audioPromiseRef = useRef(null)
   const [playing, setPlaying] = useState(false)
+  const audioRef = useRef(initAudio())
   const [currentAudio, setAudioState] = useState(null)
   const [accessToken, setAccessToken] = useState(getAccessToken())
 
   const fetchSong = (artist) => {
     const spotifyId = artist.spotifyId;
-    const url = `https://api.spotify.com/v1/artists/${spotifyId}/top-tracks?country=CH`;
+    const url = `https://api.spotify.com/v1/artists/${spotifyId}/top-tracks?country=from_token`;
     let result = fetch(url, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -96,7 +109,7 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
             }
 
             return {
-              audio: new Audio(track.preview_url),
+              audioUrl: track.preview_url,
               artistName: artist.name,
               artistId: spotifyId,
               trackName: track.name,
@@ -125,46 +138,44 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
 
   const controlPlayback = () => {
     if (playing) {
-      let [a, promise] = play();
-      if (a) {
-        return () => {
-          promise.then(() => a.pause()).catch((error) => error)
-        }
+      play();
+      return () => {
+        pause();
       }
     } else {
       pause()
     }
   }
 
-  useEffect(() => {
-    if (!currentAudio) {
-      fetchNext()
-    }
-  }, [currentAudio])
+  // useEffect(() => {
+  //   if (!currentAudio) {
+  //     fetchNext()
+  //   }
+  // }, [currentAudio])
 
-  useEffect(() => controlPlayback(), [currentArtist, playing, currentAudio]);
+  useEffect(() => controlPlayback(), [playing, currentAudio]);
 
   const getCurrentAudio = () => {
-    return currentAudio ? currentAudio.audio : null;
+    return currentAudio;
   }
 
-  const play = () => {
+  const play = async () => {
     let a = getCurrentAudio();
     if (a) {
-      a.addEventListener('ended', next);
-      let promise = a.play();
-      audioPromiseRef.current = promise;
-      return [a, promise];
+      let audio = audioRef.current;
+      audio.addEventListener('ended', next);
+      audio.src = a.audioUrl;
+      audio.load();
+      await audio.play();
+      return audio;
     }
-    return [null, null];
+    return null;
   }
 
-  const pause = () => {
-    let a = getCurrentAudio();
+  const pause = async () => {
+    let a = audioRef.current;
     if (a) {
-      let promise = audioPromiseRef.current;
-      if (promise)
-        promise.then(() => a.pause()).catch((error) => error)
+      a.pause()
     }
   }
 
@@ -174,13 +185,13 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
 
   const getPlayer = () => {
     return (
-      <Card className={classes.root}>
+      <Card className={classes.root} square={true}>
         <div className={classes.details}>
           <CardContent className={classes.content}>
             {currentAudio ?
               <Fragment>
                 <div onClick={() => setPlaying(false)}>
-                  <PlayerLink href={`https://open.spotify.com/artist/${currentAudio.trackId}`} content={currentAudio.trackName} header={true} playing={playing} />
+                  <PlayerLink href={`https://open.spotify.com/track/${currentAudio.trackId}`} content={currentAudio.trackName} header={true} playing={playing} />
                   <PlayerLink href={`https://open.spotify.com/artist/${currentAudio.artistId}`} content={currentAudio.artistName} header={false} playing={playing} />
                 </div>
               </Fragment>
@@ -192,7 +203,7 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
             }
           </CardContent>
           <div className={classes.controls}>
-            <IconButton aria-label="play/pause" onClick={() => setPlaying(!playing)}>
+            <IconButton aria-label="play/pause" onClick={() => { setPlaying(!playing) }}>
               {playing ?
                 <PauseCircleFilledIcon className={classes.playIcon} />
                 : <PlayArrowIcon className={classes.playIcon} />}
