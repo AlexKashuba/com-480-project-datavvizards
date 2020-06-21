@@ -25,13 +25,10 @@ const useStyles = makeStyles((theme) => ({
     "0%": {
       transform: "translate(0, 0)"
     },
-    "33%": {
-      transform: "translate(-100%, 0)"
+    "50%": {
+      transform: "translate(-50%, 0)"
     },
-    "33.001%": {
-      transform: "translate(100%, 0)"
-    },
-    "66%": {
+    "50.001%": {
       transform: "translate(0, 0)"
     },
     "100%": {
@@ -42,10 +39,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PlayerLink({ href, content, header, playing }) {
   const elementRef = useRef()
+  const aRef = useRef()
   const classes = useStyles()
 
   useEffect(() => {
     if (playing && isOverflown(elementRef.current)) {
+      aRef.current.innerHTML = content + "<span style=\"padding: 50px\" \/>"+content;
       elementRef.current.classList.add(classes.marqueeWrapper);
     }else{
       elementRef.current.classList.remove(classes.marqueeWrapper);
@@ -53,7 +52,7 @@ export default function PlayerLink({ href, content, header, playing }) {
   }, [content, playing])
 
   const getInner = () => (
-    <a className={classes.link} target="_blank" rel="noopener noreferrer"
+    <a ref={aRef} className={classes.link} target="_blank" rel="noopener noreferrer"
       href={href}>
       {content}
     </a>
