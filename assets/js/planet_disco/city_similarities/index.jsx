@@ -12,7 +12,15 @@ export default () => {
 
     useEffect(() => {
         d3.csv("/data/embedding_cities.csv").then((new_data) => {
-            setData(new_data)
+            const geoColorScale = d3.scaleSequential().domain([0, 1])
+                .interpolator(d3.interpolateSpectral);
+            new_data.forEach(function (d) {
+                d.geohash_norm = +d.geohash_norm;
+                d.color = geoColorScale(d.geohash_norm)
+            });
+            d3.json("/data/countries-110m.json").then((topology) => {
+                setData({ data: new_data, topology: topology })
+            })
         })
     }, [])
 

@@ -19,10 +19,6 @@ const labelExtent = [1, 10];
 
 const initialScale = 0.7;
 
-const geoColorScale = d3.scaleSequential().domain([0, 1])
-  .interpolator(d3.interpolateSpectral);
-
-
 const useStyles = makeStyles(theme => ({
   root: {
     letterSpacing: "initial",
@@ -52,7 +48,7 @@ const useStyles = makeStyles(theme => ({
 
 
 //Data needs to be ready
-export default ({ data }) => {
+export default ({ data: { data, topology } }) => {
   const { state: { city, wormholes: { panel, sidebar } }, dispatch } = useContext(StoreContext)
 
   const onCitySelect = (c) => dispatch({ type: 'SET_CITY', city: c })
@@ -133,8 +129,6 @@ export default ({ data }) => {
       d.y = +d.y;
       d.cx = x(d.x);
       d.cy = y(d.y);
-      d.geohash_norm = +d.geohash_norm;
-      d.color = geoColorScale(d.geohash_norm)
       d.scale = labelScale(d.rank);
       d.dotVisible = true;
       d.highlight = false;
@@ -213,7 +207,7 @@ export default ({ data }) => {
           .scale(Math.max(10, currentK.current))
           .translate(-city.cx, -city.cy)
       );
-    }else{
+    } else {
       redraw()
     }
   }
@@ -236,7 +230,7 @@ export default ({ data }) => {
       {panel && <FragmentWormhole to={panel}>
         <Box className={classes.panelContainer}>
           <Description className={classes.panelDescription} />
-          <Map className={classes.panelMap} data={data} redraw={() => redraw()} />
+          <Map className={classes.panelMap} data={{ data: data, topology: topology }} redraw={() => redraw()} />
         </Box>
       </FragmentWormhole>}
 

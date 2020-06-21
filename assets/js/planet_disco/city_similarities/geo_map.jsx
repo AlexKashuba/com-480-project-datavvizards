@@ -28,7 +28,8 @@ class Map extends Component {
     this.svgRef = createRef();
     this.transform = d3.zoomIdentity;
     this.state = { brush: false };
-    this.data = props.data;
+    this.data = props.data.data;
+    this.topology = props.data.topology;
   }
 
   componentDidMount() {
@@ -42,60 +43,61 @@ class Map extends Component {
 
     const svg = d3.select(this.svgRef.current);
     const g = d3.select(this.gRef.current);
+    const topology = this.topology;
 
-    d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then((topology) => {
-      g.selectAll("path")
-        .data(topojson.feature(topology, topology.objects.countries).features)
-        .enter().append("path")
-        .attr("d", path);
+    g.selectAll("path")
+      .data(topojson.feature(topology, topology.objects.countries).features)
+      .enter().append("path")
+      .attr("d", path)
+      .style('stroke', 'white')
+      .style('stroke-width', '0.2');
 
-      g.selectAll("circle")
-        .data(data)
-        .join("circle")
-        .attr("cx", function (d) {
-          var p = projection([+d.g_x, +d.g_y]);
-          return p[0];
-        })
-        .attr("cy", d => projection([+d.g_x, +d.g_y])[1])
-        .attr("r", 2)
-        .attr("fill", d => d.color)
+    g.selectAll("circle")
+      .data(data)
+      .join("circle")
+      .attr("cx", function (d) {
+        var p = projection([+d.g_x, +d.g_y]);
+        return p[0];
+      })
+      .attr("cy", d => projection([+d.g_x, +d.g_y])[1])
+      .attr("r", 2)
+      .attr("fill", d => d.color)
 
-      const updateChart = () => {
-        let extent = d3.event.selection;
-        const isBrushed = (d) => {
-          let x0 = extent[0][0],
-            x1 = extent[1][0],
-            y0 = extent[0][1],
-            y1 = extent[1][1];
+    const updateChart = () => {
+      let extent = d3.event.selection;
+      const isBrushed = (d) => {
+        let x0 = extent[0][0],
+          x1 = extent[1][0],
+          y0 = extent[0][1],
+          y1 = extent[1][1];
 
-          let proj = projection([+d.g_x, +d.g_y]);
-          let cx = proj[0] * this.transform.k + this.transform.x;
-          let cy = proj[1] * this.transform.k + this.transform.y;
-          d.highlight = x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
-        }
-        data.forEach(isBrushed);
-        this.props.redraw();
+        let proj = projection([+d.g_x, +d.g_y]);
+        let cx = proj[0] * this.transform.k + this.transform.x;
+        let cy = proj[1] * this.transform.k + this.transform.y;
+        d.highlight = x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
       }
+      data.forEach(isBrushed);
+      this.props.redraw();
+    }
 
-      const zoomed = () => {
-        let transform = d3.event.transform;
-        this.transform = transform;
-        g.attr("transform", transform).attr("stroke-width", 5 / transform.k);
-        g.selectAll("circle").attr("r", 2 / transform.k);
-      }
+    const zoomed = () => {
+      let transform = d3.event.transform;
+      this.transform = transform;
+      g.attr("transform", transform).attr("stroke-width", 5 / transform.k);
+      g.selectAll("circle").attr("r", 2 / transform.k);
+    }
 
-      this.brush = svg.append("g");
+    this.brush = svg.append("g");
 
-      this.brush.call(d3.brush()
-        .extent([[-200, -70], [450, 350]])
-        .on("start brush", updateChart)).attr("display", "none")
+    this.brush.call(d3.brush()
+      .extent([[-200, -70], [450, 350]])
+      .on("start brush", updateChart)).attr("display", "none")
 
-      const zoom = d3.zoom()
-        .scaleExtent([0.5, 32])
-        .on("zoom", zoomed);
+    const zoom = d3.zoom()
+      .scaleExtent([0.5, 32])
+      .on("zoom", zoomed);
 
-      svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
-    });
+    svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
   }
 
   toggleBrush = () => {
@@ -112,14 +114,14 @@ class Map extends Component {
               <g ref={this.gRef}></g>
             </svg>
           </CardMedia>
-          <CardActions style={{height: 70}}>
+          <CardActions style={{ height: 70 }}>
             <Box m={2}>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
                 onClick={this.toggleBrush}
-                style ={{textDecoration: "none"}}
+                style={{ textDecoration: "none" }}
               >
                 Enable {this.state.brush ? "move" : "brush"}
               </Button>

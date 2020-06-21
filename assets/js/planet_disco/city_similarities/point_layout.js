@@ -10,13 +10,14 @@ export class PointsLayout {
         return this
     }
 
-    drawGlow = (visible) => {
-        this.ctx.fillStyle = 'white';
+    drawGlow = (d) => {
         const radiusScale = 1.5;
-        visible.forEach((d) => {
-            if (d.highlight || d.selected)
-                this.drawPoint(d, this.ctx, radiusScale)
-        })
+        if (d.highlight || d.selected) {
+            this.ctx.save()
+            this.ctx.fillStyle = 'white';
+            this.drawPoint(d, this.ctx, radiusScale)
+            this.ctx.restore()
+        }
     }
 
     drawPoint = (d, context, radiusScale = 1) => {
@@ -25,15 +26,19 @@ export class PointsLayout {
         context.fill();
     }
 
+    drawWithGlow = (d) => {
+        this.drawGlow(d)
+        this.drawPoint(d, this.ctx)
+    }
+
     drawPoints = (visible) => {
-        this.drawGlow(visible);
         let prevColor = null
-        visible.sort((d) => d.color).forEach(d => {
+        visible.sort(d => d.highlight).sort((d) => d.color).forEach(d => {
             if (d.color != prevColor) { //sort by color to make few state updates to the canvas
                 this.ctx.fillStyle = d.color;
                 prevColor = d.color;
             }
-            this.drawPoint(d, this.ctx)
+            this.drawWithGlow(d)
         })
     }
 }
