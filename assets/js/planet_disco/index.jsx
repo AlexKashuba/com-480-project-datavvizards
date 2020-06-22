@@ -1,7 +1,7 @@
 import React from 'react'
 import { Router } from 'react-router'
 import { Switch, Route } from 'react-router-dom'
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+import { createMuiTheme, ThemeProvider, responsiveFontSizes } from '@material-ui/core/styles'
 import { StoreContextProvider } from './common/store'
 import PlanetView from './planet_view'
 import GenresView from './genres_view'
@@ -9,7 +9,7 @@ import CitySimilarities from './city_similarities'
 import Overlay from './common/overlay'
 import SpotifySimpleLogin from './common/spotify_simple_login'
 
-const theme = createMuiTheme({
+const theme = responsiveFontSizes(createMuiTheme({
   palette: {
     type: 'dark',
     primary: {
@@ -29,7 +29,7 @@ const theme = createMuiTheme({
       'Roboto, Helvetica Neue, sans-serif',
     ].join(','),
   },
-})
+}))
 
 export default ({ match, history }) => {
   return <StoreContextProvider>
