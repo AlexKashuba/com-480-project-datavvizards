@@ -29,10 +29,10 @@ export default () => {
   const classes = useStyles()
 
   return <Grid container className={classes.root} spacing={3}>
-    <Grid className={classes.children} item xs={3}>
+    <Grid className={classes.children} item xs={4} lg={3}>
       <Panel />      
     </Grid>
-    <Grid item className={classes.children} xs={3}>
+    <Grid item className={classes.children} xs={4} lg={3}>
       <WormholeBase name='sidebar' className={classes.sidebar} />
     </Grid>
   </Grid>
