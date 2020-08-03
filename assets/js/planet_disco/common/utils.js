@@ -4,6 +4,21 @@ import { geoInterpolate } from 'd3-geo'
 import { Spherical } from 'three'
 
 export const toRad = (x) => x * Math.PI / 180
+
+export function debounce(func, wait, immediate) {
+  var timeout;
+  return function () {
+    var context = this, args = arguments;
+    var later = function () {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+};
  
 export const updateQuery = (key) => (base, {fetchMoreResult}) => {
   if (!fetchMoreResult) return base;

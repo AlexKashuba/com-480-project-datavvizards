@@ -9,6 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApolloClient } from '@apollo/react-hooks'
+import { debounce } from './utils'
 
 
 const CITIES = gql`query CitiesAutocomplete($term: String) {
@@ -21,22 +22,6 @@ const CITIES = gql`query CitiesAutocomplete($term: String) {
     }
   }
 }`
-
-
-function debounce(func, wait, immediate) {
-  var timeout;
-  return function () {
-    var context = this, args = arguments;
-    var later = function () {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
-  };
-};
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -89,7 +74,7 @@ export default function GoogleMaps() {
   return (
     <Autocomplete
       id="city-selector"
-      getOptionLabel={(option) => `${option.city}, ${option.humanCountry}`} 
+      getOptionLabel={(option) => `${option.city}, ${option.humanCountry}`}
       getOptionSelected={(option, value) => option.id === value.id}
       filterOptions={(x) => x}
       options={options}

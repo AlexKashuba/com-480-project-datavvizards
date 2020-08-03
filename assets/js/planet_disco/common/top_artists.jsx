@@ -7,6 +7,9 @@ import { gql } from 'apollo-boost'
 import { processScroll, updateQuery } from './utils'
 import invariant from 'invariant'
 import PersonIcon from '@material-ui/icons/Person';
+import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import { debounce } from './utils'
 
 import ArtistPlayer from './artist_player'
 
@@ -55,7 +58,8 @@ export default ({ city, genre }) => {
   invariant(!!city ^ !!genre, 'Either city or genre should be passed into TopArtists component')
   const classes = useStyles()
 
-  const variables = city ? { byType: 'city', byId: city.id } : { byType: 'genre', byId: genre.genreId }
+  const [metric, setMetric] = useState('cityScore')
+  const variables = city ? { byType: metric, byId: city.id } : { byType: 'genre', byId: genre.genreId }
   const { loading, data, fetchMore } = useQuery(TOP_ARTISTS, { variables, fetchPolicy: "cache-and-network" })
 
   const [artistIdx, setArtistIdx] = useState(0)
@@ -80,8 +84,17 @@ export default ({ city, genre }) => {
       setArtistIdx(-1)
   }
 
+  useEffect(() => {
+    setArtistIdx(0)
+  }, [metric])
+
   return (
     <Fragment>
+      {city &&
+        <ButtonGroup style={{"height": "3.5rem"}} aria-label="contained primary button group" fullWidth>
+          <Button onClick={() => setMetric("cityPopularity")} variant={metric == "cityPopularity" ? "contained" : "outlined"}>Popular</Button>
+          <Button onClick={() => setMetric("cityScore")} variant={metric == "cityScore" ? "contained" : "outlined"}>Specific</Button>
+        </ButtonGroup>}
       <List
         className={classes.root}
         onScroll={processScroll(variables, 600, 'topArtists', { loading, data, fetchMore })}
