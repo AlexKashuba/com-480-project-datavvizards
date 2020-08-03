@@ -42,11 +42,15 @@ defmodule SpotifyTrackerWeb.Resolvers do
     # ARTISTS ENDPOINT
     def get_top_artists(_, %{by_type: type, by_id: id} = args, _) do
       case type do
-        "city" -> from a in Artist,
+        "cityScore" -> from a in Artist,
           join: ac in "artist_cities", on: a.id == ac.artist_id,
-          join: c in "cities", on: ac.city_id == c.id,
           where: ac.city_id == type(^id, :integer),
-          order_by: [desc: (ac.score * c.population)]
+          where: ac.listeners > 100,
+          order_by: [desc: ac.score]
+        "cityPopularity" -> from a in Artist,
+          join: ac in "artist_cities", on: a.id == ac.artist_id,
+          where: ac.city_id == type(^id, :integer),
+          order_by: [desc: (ac.listeners)]
         "genre" -> from a in Artist,
           left_join: ag in "artist_genres", on: a.id == ag.artist_id,
           where: ag.genre_id == type(^id, :integer),
