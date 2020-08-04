@@ -91,7 +91,7 @@ export default ({ city, genre }) => {
   return (
     <Fragment>
       {city &&
-        <ButtonGroup style={{"height": "3.5rem"}} aria-label="contained primary button group" fullWidth>
+        <ButtonGroup style={{"height": "2.5rem"}} aria-label="contained primary button group" fullWidth>
           <Button onClick={() => setMetric("cityPopularity")} variant={metric == "cityPopularity" ? "contained" : "outlined"}>Popular</Button>
           <Button onClick={() => setMetric("cityScore")} variant={metric == "cityScore" ? "contained" : "outlined"}>Specific</Button>
         </ButtonGroup>}
