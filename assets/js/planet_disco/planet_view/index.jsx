@@ -1,4 +1,4 @@
-import React, { Suspense, useContext, useState, useMemo, useEffect } from 'react'
+import React, { Suspense, useContext, useState, useMemo, useEffect, Fragment } from 'react'
 import Stars from './stars'
 import Earth from './earth'
 import Cities from './cities'
@@ -12,6 +12,7 @@ import CityLookup from '../common/city_lookup'
 import { useQuery, useApolloClient } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import { Canvas } from 'react-three-fiber'
+import Similar from '../common/similar_cities'
 
 const SIMILAR_CITIES = gql`query CityGenres($cityId: ID) {
   similarCities(id: $cityId) {
@@ -63,10 +64,13 @@ export default () => {
     />}>
       <scene>
         {panel && <ContextWormhole to={panel}>
-          <GenrePopularity genreColors={genreColors} setGenreColors={(gc) => {
-            dispatch({ type: 'SET_CITY' })
-            setGenreColors(gc)
-          }} />
+          <Fragment>
+            <GenrePopularity genreColors={genreColors} setGenreColors={(gc) => {
+              dispatch({ type: 'SET_CITY' })
+              setGenreColors(gc)
+            }} />
+            {citySync.similarCities && citySync.similarCities.length > 0 && <Similar style={{marginTop: 15}} cities={citySync.similarCities} />}
+          </Fragment>
         </ContextWormhole>}
 
         {sidebar && <ContextWormhole to={sidebar}>

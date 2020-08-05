@@ -29,6 +29,12 @@ const useStyles = makeStyles((theme) => ({
   },
   switch: {
     marginBottom: theme.spacing(3)
+  },
+  nameHeader: {
+    fontWeight: 600,
+    ['@media (max-height:500px)']: {
+      display: "none"
+    }
   }
 }))
 
@@ -38,7 +44,7 @@ export default ({ onCitySelect }) => {
   const buttonVariant = (path) => location.pathname === path ? 'contained' : 'outlined'
 
   return <Paper className={classes.panel}>
-    <Typography variant="h4" component="h1" style={{ fontWeight: 600 }}>
+    <Typography variant="h4" component="h1" className={classes.nameHeader}>
       Disco Planet 
     </Typography>
 

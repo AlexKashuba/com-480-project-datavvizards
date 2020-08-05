@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, useRef } from 'react'
 import { List, ListItem, ListItemAvatar, ListItemText, Avatar, Divider } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Skeleton } from '@material-ui/lab'
@@ -61,28 +61,37 @@ export default ({ city, genre }) => {
   const [metric, setMetric] = useState('cityScore')
   const variables = city ? { byType: metric, byId: city.id } : { byType: 'genre', byId: genre.genreId }
   const { loading, data, fetchMore } = useQuery(TOP_ARTISTS, { variables, fetchPolicy: "cache-and-network" })
+  const artistIdxRef = useRef();
+
 
   const [artistIdx, setArtistIdx] = useState(0)
   useEffect(() => setArtistIdx(0), [city, genre])
 
-  const fetchNextArtist = () => {
+
+  artistIdxRef.current = artistIdx;
+
+  function fetchNextArtist() {
     if (!data) {
+      setArtistIdx(-1)
       return
     }
 
-    if (artistIdx < data.topArtists.entries.length - 1) {
-      setArtistIdx(artistIdx + 1)
+    if (data && artistIdxRef.current < data.topArtists.entries.length - 1) {
       return
     }
 
-    if (!loading && data.topArtists.cursor)
+    if (!loading)
       fetchMore({
-        variables: { ...variables, cursor: data.topArtists.cursor },
+        variables: { ...variables, cursor: data ? data.topArtists.cursor : null },
         updateQuery: updateQuery('topArtists')
       })
     else
       setArtistIdx(-1)
   }
+
+  useEffect(() => {
+    fetchNextArtist()
+  }, [artistIdx])
 
   useEffect(() => {
     setArtistIdx(0)
@@ -91,7 +100,7 @@ export default ({ city, genre }) => {
   return (
     <Fragment>
       {city &&
-        <ButtonGroup style={{"height": "2.5rem"}} aria-label="contained primary button group" fullWidth>
+        <ButtonGroup style={{"height": "3em"}} aria-label="contained primary button group" fullWidth>
           <Button onClick={() => setMetric("cityPopularity")} variant={metric == "cityPopularity" ? "contained" : "outlined"}>Popular</Button>
           <Button onClick={() => setMetric("cityScore")} variant={metric == "cityScore" ? "contained" : "outlined"}>Specific</Button>
         </ButtonGroup>}
@@ -132,7 +141,7 @@ export default ({ city, genre }) => {
         </Fragment>))}
       </List>
 
-      <ArtistPlayer currentArtist={(data && artistIdx > -1) ? data.topArtists.entries[artistIdx] : null} fetchNext={fetchNextArtist} />
+      <ArtistPlayer currentArtist={(data && artistIdx > -1) ? data.topArtists.entries[artistIdx] : null} fetchNext={() => setArtistIdx(artistIdx => artistIdx + 1)} />
     </Fragment>
   )
 }

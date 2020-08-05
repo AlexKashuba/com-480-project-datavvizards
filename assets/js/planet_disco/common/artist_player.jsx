@@ -68,17 +68,23 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
   const [playing, setPlaying] = useState(false)
   const [currentAudio, setAudioState] = useState(null)
   const [accessToken, setAccessToken] = useState(getAccessToken())
+
+  const next = () => {
+    fetchNext();
+  }
+
   const audioPlayer = useRef(
     (() => {
       let a = new Audio("https://p.scdn.co/mp3-preview/33b6c8c739a224fc7f47135c9bc21f23b768bead?cid=6371ef37c4fc48a18b52a3837f1b51a9")
       a.crossOrigin = "anonymous";
+      a.addEventListener('ended', next);
       return a;
     })()
   )
 
   const fetchSong = (artist) => {
     const spotifyId = artist.spotifyId;
-    const url = `https://api.spotify.com/v1/artists/${spotifyId}/top-tracks?country=CH`;
+    const url = `https://api.spotify.com/v1/artists/${spotifyId}/top-tracks?country=from_token`;
     let result = fetch(url, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -167,7 +173,6 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
     // }
     let a = getCurrentAudio();
     if (a) {
-      a.addEventListener('ended', next);
       let promise = a.play();
       audioPromiseRef.current = promise;
       return [a, promise];
@@ -184,9 +189,7 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
     }
   }
 
-  const next = () => {
-    fetchNext();
-  }
+  
 
   const getPlayer = () => {
     return (

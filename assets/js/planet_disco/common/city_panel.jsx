@@ -59,7 +59,7 @@ export default ({ city, similarCities }) => {
         </IconButton>
       </Typography>
 
-      {similarCities && similarCities.length > 0 && <Similar cities={similarCities} />}
+      {/* {similarCities && similarCities.length > 0 && <Similar cities={similarCities} />} */}
     </div>
     {selector == 'artists' ? <TopArtists city={city} /> : <TopGenres city={city} />}
   </Paper>
