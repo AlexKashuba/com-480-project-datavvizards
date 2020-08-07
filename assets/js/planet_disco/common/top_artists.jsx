@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useRef } from 'react'
+import React, { Fragment, useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { List, ListItem, ListItemAvatar, ListItemText, Avatar, Divider } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Skeleton } from '@material-ui/lab'
@@ -61,14 +61,23 @@ export default ({ city, genre }) => {
   const [metric, setMetric] = useState('cityScore')
   const variables = city ? { byType: metric, byId: city.id } : { byType: 'genre', byId: genre.genreId }
   const { loading, data, fetchMore } = useQuery(TOP_ARTISTS, { variables, fetchPolicy: "cache-and-network" })
-  const artistIdxRef = useRef();
 
+  const topOfList = useRef();
+
+  const scrollToTop = () => {
+    if (topOfList.current) {
+      // topOfList.current.scrollIntoView();
+      topOfList.current.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'auto'
+      })
+    }
+  };
 
   const [artistIdx, setArtistIdx] = useState(0)
-  useEffect(() => setArtistIdx(0), [city, genre])
-
-
-  artistIdxRef.current = artistIdx;
+  useEffect(() => {scrollToTop(); setArtistIdx(0)}, [city, genre, metric])
+  // useLayoutEffect(() => scrollToTop(), [city, genre, metric])
 
   function fetchNextArtist() {
     if (!data) {
@@ -76,7 +85,7 @@ export default ({ city, genre }) => {
       return
     }
 
-    if (data && artistIdxRef.current < data.topArtists.entries.length - 1) {
+    if (data && artistIdx < data.topArtists.entries.length - 1) {
       return
     }
 
@@ -93,21 +102,19 @@ export default ({ city, genre }) => {
     fetchNextArtist()
   }, [artistIdx])
 
-  useEffect(() => {
-    setArtistIdx(0)
-  }, [metric])
-
   return (
-    <Fragment>
+    <Fragment key={city}>
       {city &&
-        <ButtonGroup style={{"height": "3em"}} aria-label="contained primary button group" fullWidth>
+        <ButtonGroup style={{ "height": "3em" }} aria-label="contained primary button group" fullWidth>
           <Button onClick={() => setMetric("cityPopularity")} variant={metric == "cityPopularity" ? "contained" : "outlined"}>Popular</Button>
           <Button onClick={() => setMetric("cityScore")} variant={metric == "cityScore" ? "contained" : "outlined"}>Specific</Button>
         </ButtonGroup>}
       <List
         className={classes.root}
         onScroll={processScroll(variables, 600, 'topArtists', { loading, data, fetchMore })}
+        ref={topOfList}
       >
+        {/* {<span ref={topOfList} />} */}
         {data && data.topArtists.entries.map((artist, i) => (<Fragment key={i}>
           <ListItem button selected={i == artistIdx} alignItems="flex-start" onClick={() => setArtistIdx(i)}>
             <ListItemAvatar>
