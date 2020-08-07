@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import TopArtists from './top_artists'
 import TopGenres from './top_genres'
 import { StoreContext } from './store'
-import Similar from './similar_cities'
+// import Similar from './similar_cities'
 import { useTheme } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 

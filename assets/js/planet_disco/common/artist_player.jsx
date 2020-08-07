@@ -13,6 +13,8 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import PauseCircleFilledIcon from '@material-ui/icons/PauseCircleFilled';
 
+import WarningPopover from './preview_error'
+
 import Skeleton from '@material-ui/lab/Skeleton';
 
 import PlayerLink from './player_link'
@@ -102,14 +104,16 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
             const track = result.tracks[0];
 
             let cover = null;
+            let preview = null;
             try {
               cover = track.album.images[1].url;
+              preview = track.preview_url;
             } catch (err) {
               console.log(err)
             }
 
             return {
-              audio_url: track.preview_url,
+              audio_url: preview,
               artistName: artist.name,
               artistId: spotifyId,
               trackName: track.name,
@@ -219,6 +223,7 @@ export default function ArtistPlayer({ currentArtist, fetchNext }) {
             <IconButton aria-label="next" onClick={next}>
               <SkipNextIcon />
             </IconButton>
+            {currentAudio && !currentAudio.audio_url && <WarningPopover/>}
           </div>
         </div>
         <CardMedia
