@@ -76,8 +76,6 @@ export default ({ city, genre }) => {
   };
 
   const [artistIdx, setArtistIdx] = useState(0)
-  useEffect(() => {scrollToTop(); setArtistIdx(0)}, [city, genre, metric])
-  // useLayoutEffect(() => scrollToTop(), [city, genre, metric])
 
   function fetchNextArtist() {
     if (!data) {
@@ -101,6 +99,8 @@ export default ({ city, genre }) => {
   useEffect(() => {
     fetchNextArtist()
   }, [artistIdx])
+
+  useEffect(() => {scrollToTop(); setArtistIdx(0)}, [city, genre, metric])
 
   return (
     <Fragment key={city}>
